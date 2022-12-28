@@ -15,7 +15,7 @@ module "resource_group" {
 module "storage_account" {
   source                    = "../../modules/sa"
   name                      = "sa${random_pet.this.id}"
-  resource_group_name       = module.resource_group.name
+  rg_name                   = module.resource_group.name
   location                  = module.resource_group.location
   enable_https_traffic_only = var.enable_https_traffic_only
 }
