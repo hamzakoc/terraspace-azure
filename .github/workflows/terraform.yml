@@ -15,11 +15,7 @@ env:
 jobs:
   plan:
     runs-on: ubuntu-latest
-    container:
-        image: acrgithubdevcc.azurecr.io/az-cli-lowest:terraspace-v2.2.1
-        credentials:
-          username: "acrgithubdevcc"
-          password: ${{ secrets.ACR_SECRET }}
+ 
 
     steps:
       - uses: actions/checkout@v3
