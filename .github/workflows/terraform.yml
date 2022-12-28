@@ -1,41 +1,29 @@
-name: Terraform Apply - Dev
+trigger:
+  - main # once merged into main `terraspace up` runs on dev env
 
-on:
-  push:
-    branches: [ main ]
+pool:
+  vmImage: ubuntu-latest
 
-  workflow_dispatch:
-  
-env: 
-  ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-  ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-  ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-  ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+# Note: common-variables group must already exist.
+variables:
+- group: common-variables
 
-jobs:
-  plan:
-    runs-on: ubuntu-latest
- 
+steps:
+- task: UseRubyVersion@0
+  inputs:
+    versionSpec: '>= 3.1'
 
-    steps:
-      - uses: actions/checkout@v3
+- script: |
+    .azure/bin/install
+  displayName: install terraspace
 
-      - name: Install TerraSpace
-        run: |
-
-          bundle update
-          bundle
-        
-      - name: Check TerraSpace Installation
-        run: terraspace setup check
-        
-      - name: Check az cli
-        run: az version
-        
-      - name: az Login
-      
-        run: |
-          az login --service-principal -u "$ARM_CLIENT_ID" -p "$ARM_CLIENT_SECRET" --tenant "$ARM_TENANT_ID"
-          az account list
-          
- 
+- script: |
+    export ARM_CLIENT_ID=$(ARM_CLIENT_ID)
+    export ARM_CLIENT_SECRET=$(ARM_CLIENT_SECRET)
+    export ARM_SUBSCRIPTION_ID=$(ARM_SUBSCRIPTION_ID)
+    export ARM_TENANT_ID=$(ARM_TENANT_ID)
+    export TS_TOKEN=$(TS_TOKEN)
+    # Uncomment export INFRACOST_API_KEY if using cost estimates
+    # export INFRACOST_API_KEY=$(INFRACOST_API_KEY)
+    terraspace up demo
+  displayName: terraspace up
